@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Messages</title>
+
+<style>
+body {
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:url('bg.jpg') no-repeat center center fixed;
+  background-size:cover;
+}
+
+.overlay {
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0,0,0,0.6);
+}
+
+.box {
+  position:relative;
+  z-index:2;
+  width:90%;
+  max-width:380px;
+  margin:30px auto;
+  padding:18px;
+  border-radius:20px;
+  background: rgba(20,20,20,0.75);
+  backdrop-filter: blur(20px);
+  box-shadow:0 0 30px rgba(0,0,0,0.7);
+  color:white;
+}
+
+/* язык */
+.lang {
+  display:flex;
+  gap:8px;
+  margin-bottom:15px;
+}
+
+.lang button {
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:rgba(255,255,255,0.1);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.lang button:hover {
+  background:#ff3366;
+}
+
+/* онлайн */
+.online {
+  color:#00ff88;
+  font-size:13px;
+}
+
+/* чат */
+.chat {
+  margin-top:10px;
+}
+
+.msg {
+  display:flex;
+  margin-top:12px;
+  opacity:0;
+  transform:translateY(20px) scale(0.95);
+  transition:0.4s ease;
+}
+
+.msg.show {
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+.avatar {
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  margin-right:10px;
+}
+
+.bubble {
+  background:rgba(255,255,255,0.08);
+  padding:10px 12px;
+  border-radius:14px;
+  font-size:13px;
+  max-width:75%;
+}
+
+/* кнопка */
+.btn {
+  margin-top:18px;
+  width:100%;
+  padding:15px;
+  font-size:16px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(45deg,#ff0033,#ff3366);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow:0 0 0 rgba(255,0,80,0.7); }
+  50% { box-shadow:0 0 25px rgba(255,0,80,1); }
+  100% { box-shadow:0 0 0 rgba(255,0,80,0.7); }
+}
+
+.timer {
+  color:#ff4444;
+  font-size:13px;
+  margin-top:8px;
+  text-align:center;
+}
+
+/* TELEGRAM */
+.tg {
+  margin-top:12px;
+  text-align:center;
+}
+
+.tg a {
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.08);
+  color:#ccc;
+  font-size:13px;
+  text-decoration:none;
+  transition:0.3s;
+}
+
+.tg a:hover {
+  background:#229ED9;
+  color:white;
+}
+
+.tg-sub {
+  font-size:11px;
+  opacity:0.6;
+  margin-top:6px;
+}
+
+@media (max-width:480px){
+  .bubble {font-size:12px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<div class="box">
+
+<!-- язык -->
+<div class="lang">
+  <button onclick="changeLang('EN')">🇬🇧</button>
+  <button onclick="changeLang('PL')">🇵🇱</button>
+  <button onclick="changeLang('DE')">🇩🇪</button>
+</div>
+
+<h2 id="title"></h2>
+<p id="online" class="online"></p>
+
+<div id="chat" class="chat"></div>
+
+<p class="timer"><span id="timerText"></span> <span id="time">20</span>s</p>
+
+<button id="btn" class="btn" onclick="go()"></button>
+
+<!-- TELEGRAM -->
+<div class="tg">
+  <a href="https://t.me/+rNjpTHzr4Ks4OTgy" target="_blank">
+    💬 3,200+ users in private Telegram
+  </a>
+  <p class="tg-sub">🔒 Private access available</p>
+</div>
+
+<p id="adult" style="font-size:12px;"></p>
+
+</div>
+
+<script>
+
+// тексты
+const texts = {
+EN:{title:"📩 You have new messages",online:"● 152 people online near you",btn:"CHECK MESSAGES",adult:"🔞 18+ only",timer:"Offer ends in:",msg:"Hey... I saw you 👀"},
+PL:{title:"📩 Masz nowe wiadomości",online:"● 152 osoby online w Twojej okolicy",btn:"SPRAWDŹ WIADOMOŚCI",adult:"🔞 Tylko 18+",timer:"Oferta kończy się za:",msg:"Hej... widziałam Cię 👀"},
+DE:{title:"📩 Neue Nachrichten",online:"● 152 Personen online in deiner Nähe",btn:"NACHRICHTEN ANSEHEN",adult:"🔞 Nur 18+",timer:"Angebot endet in:",msg:"Hey... ich habe dich gesehen 👀"}
+};
+
+const names = ["Kasia","Anna","Julia","Ola","Marta","Natalia"];
+
+const avatars = [
+"https://randomuser.me/api/portraits/women/44.jpg",
+"https://randomuser.me/api/portraits/women/68.jpg",
+"https://randomuser.me/api/portraits/women/65.jpg",
+"https://randomuser.me/api/portraits/women/32.jpg"
+];
+
+function randomDistance(){
+  return Math.floor(Math.random()*5)+1;
+}
+
+// чат
+function startChat(lang){
+  const chat = document.getElementById("chat");
+  chat.innerHTML = "";
+  let i = 0;
+
+  function show(){
+    if(i>=3) return;
+
+    let msg = document.createElement("div");
+    msg.className="msg";
+
+    let avatar = avatars[Math.floor(Math.random()*avatars.length)];
+    let name = names[Math.floor(Math.random()*names.length)];
+
+    msg.innerHTML = `
+      <img src="${avatar}" class="avatar">
+      <div class="bubble">
+        <b>${name}</b> (${randomDistance()} km)<br>
+        <span style="color:#aaa;font-size:12px;">typing...</span>
+      </div>
+    `;
+
+    chat.appendChild(msg);
+
+    setTimeout(()=>{
+      msg.querySelector(".bubble").innerHTML =
+        `<b>${name}</b> (${randomDistance()} km)<br>${texts[lang].msg}`;
+      msg.classList.add("show");
+    },1000);
+
+    i++;
+    setTimeout(show,2000);
+  }
+
+  show();
+}
+
+// язык
+function changeLang(lang){
+  const t = texts[lang];
+  document.getElementById("title").innerText=t.title;
+  document.getElementById("online").innerText=t.online;
+  document.getElementById("btn").innerText=t.btn;
+  document.getElementById("adult").innerText=t.adult;
+  document.getElementById("timerText").innerText=t.timer;
+  startChat(lang);
+}
+
+// таймер
+let time=20;
+setInterval(()=>{
+  if(time>0){
+    time--;
+    document.getElementById("time").innerText=time;
+  }
+},1000);
+
+// редирект
+function go(){
+  window.location.href="https://t.ajrkmx1.com/407347/6224/0?bo=2779,2778,2777,2776,2775&po=6533&aff_sub5=SF_006OG000004lmDN";
+}
+
+// тряска кнопки
+setInterval(()=>{
+  let btn = document.querySelector(".btn");
+  btn.style.transform = "translateX(2px)";
+  setTimeout(()=>btn.style.transform="translateX(-2px)",100);
+},2000);
+
+// вибрация
+if(navigator.vibrate){
+  setTimeout(()=>navigator.vibrate(50),1500);
+}
+
+// старт
+changeLang("EN");
+
+</script>
+
+</body>
+</html>
